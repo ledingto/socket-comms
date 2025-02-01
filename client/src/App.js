@@ -1,19 +1,43 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import io from "socket.io-client";
+
+// Create socket connection outside component
+const socket = io("http://localhost:3005", {
+  transports: ['websocket']
+});
 
 function App() {
   const [message, setMessage] = useState('');
+  const [input, setInput] = useState('');
 
   useEffect(() => {
-    axios.get('/api/message')
-      .then(response => setMessage(response.data.message))
-      .catch(error => console.error('Error fetching data:', error));
-  }, []);
+    // Set up event listener
+    socket.on('messageFromServer', (data) => {
+      console.log("RECEIVED MESSAGE")
+      setMessage(data);
+    });
+
+    // Cleanup listener on component unmount
+    return () => {
+      socket.off('messageFromServer');
+    };
+  }, []); // Empty dependency array means this only runs once on mount
+
+  const sendMessage = () => {
+    socket.emit('messageFromClient', input);
+  };
 
   return (
-    <div style={{ textAlign: 'center', marginTop: '50px' }}>
-      <h1>React + Node.js App</h1>
-      <p>{message ? message : 'Loading...'}</p>
+    <div className="App">
+      <h1>WebSocket with Socket.io</h1>
+      <p>{message}</p>
+      <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Type a message"
+      />
+      <button onClick={sendMessage}>Send Message to Server</button>
     </div>
   );
 }
