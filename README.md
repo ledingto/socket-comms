@@ -1,11 +1,23 @@
 ## Purpose
 
-This app is a simple setup for a frontend app, running a Node Express server and rendering a React frontend.
+The goal of this app is to test the ability of the frontend to render updated data from the backend sent via a websocket connection.
 
-## Use
+## Technology Choices
 
-Open two terminal windows. In one, run "npm start" from the root folder. This will start server.js on port 3005.
+- React
+- Node.js
+- Express
+- Socket.io
 
-In the second, change directory to "client/" and run "npm start". This will start the App.js on port 3000.
+## Steps to run locally
 
-There is a proxy defined in package.json of the client to avoid CORS issues. 
+### Backend Server
+1. Clone the repository
+2. Run `npm install` to install the dependencies
+3. Run `npm start` to start the server
+
+### Frontend Client
+1. Change directory to "client/"
+2. Run `npm install` to install the dependencies
+3. Run `npm start` to start the server
+4. Visit `http://localhost:3000` to view the app, and see the status update

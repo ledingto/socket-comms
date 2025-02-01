@@ -24,7 +24,6 @@
       "react-app/jest"
     ]
   },
-  "proxy": "http://localhost:3005",
   "jest": {
     "transform": {
       "^.+\\.[tj]sx?$": "babel-jest"
