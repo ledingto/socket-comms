@@ -1,33 +1,59 @@
 import React, { useState, useEffect } from 'react';
 import io from "socket.io-client";
 import OrderTable from './components/OrderTable';
+import './App.css';
 
-// Create socket connection outside component
-const socket = io("http://localhost:3005", {
+const SOCKET_URL = "http://localhost:3005/orders";
+const API_BASE_URL = "/api";
+
+const socket = io(SOCKET_URL, {
   transports: ['websocket']
 });
 
 function App() {
-  const [status, setStatus] = useState('initial');
+  const [orders, setOrders] = useState([]);
+  const CUSTOMER_ID = "123"; // In real app, this would come from authorization
 
   useEffect(() => {
-    console.log('Setting up socket listener');
+    const fetchOrders = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/get-orders/${CUSTOMER_ID}`);
+        const data = await response.json();
+        if (data.success) {
+          setOrders(data.customerOrders);
+        }
+      } catch (error) {
+        console.error('Error fetching orders:', error);
+      }
+    };
+    fetchOrders();
 
+    // Subscribe to customer updates
+    console.log("Subscribing to customer updates");
+    socket.emit('subscribeToCustomer', CUSTOMER_ID);
+    
+    // Add listener for order updates
     socket.on('messageFromServer', (data) => {
-      console.log("RECEIVED MESSAGE")
-      setStatus(data);
+      console.log("Received order update:", data);
+      setOrders(prevOrders =>
+        prevOrders.map(order =>
+          order.order_id === data.orderId
+            ? { ...order, status: data.status }
+            : order
+        )
+      );
     });
 
     return () => {
-      console.log('Removing socket listener');
       socket.off('messageFromServer');
     };
   }, []);
 
   return (
-    <div className="App">
+    <div className="container">
       <h1>WebSocket with Socket.io</h1>
-      <OrderTable status={status} />
+      <p>Customer ID: {CUSTOMER_ID}</p>
+      <OrderTable orders={orders} />
     </div>
   );
 }
