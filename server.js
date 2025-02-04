@@ -17,15 +17,15 @@ orderNamespace.on("connection", async (socket) => {
     console.log("Client connected to orders namespace");
 
     socket.on('subscribeToCustomer', (customerId) => {
-        socket.rooms.forEach(room => {
-            if (room !== socket.id) {
-                socket.leave(room);
-            }
-        });
-        
         const room = `customer:${customerId}`;
         socket.join(room);
-        console.log(`Client subscribed to customer ${customerId}`);
+        console.log(`Customer ${customerId} subscribed to the room`);
+    });
+
+    socket.on('unsubscribeFromCustomer', (customerId) => {
+        const room = `customer:${customerId}`;
+        socket.leave(room);
+        console.log(`Customer ${customerId} left the room`);
     });
 
     socket.on("disconnect", () => {

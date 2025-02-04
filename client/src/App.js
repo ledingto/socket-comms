@@ -27,13 +27,18 @@ function Client({ customerId }) {
     };
     fetchOrders();
 
-    // Subscribe to customer updates
-    console.log(`Client ${customerId} subscribing to order updates`);
-    socket.emit('subscribeToCustomer', customerId);
-    
-    // Add listener for order updates
-    socket.on('messageFromServer', (data) => {
-      console.log(`Client ${customerId} received order update:`, data);
+    // SOCKET CONNECTION FOR UPDATES
+    const socket = io(SOCKET_URL, {
+      transports: ['websocket']
+    });
+
+    const handleConnect = () => {
+      console.log(`Client ${customerId} connected`);
+      socket.emit('subscribeToCustomer', customerId);
+    };
+
+    const handleOrderUpdate = (data) => {
+      console.log(`Client ${customerId} received update:`, data);
       setOrders(prevOrders =>
         prevOrders.map(order =>
           order.order_id === data.orderId
@@ -41,13 +46,29 @@ function Client({ customerId }) {
             : order
         )
       );
-    });
-
-    return () => {
-      socket.off('messageFromServer');
-      // socket.disconnect();
     };
-  }, []);
+
+    const handleError = (error) => {
+      console.error(`Client ${customerId} socket error:`, error);
+    };
+
+    // Set up all event listeners
+    socket.on('connect', handleConnect);
+    socket.on('messageFromServer', handleOrderUpdate);
+    socket.on('error', handleError);
+
+    // Clean up connections and listeners
+    return () => {
+      if (socket) {
+        socket.off('messageFromServer');
+        socket.off('error');
+        socket.off('connect');
+      }
+
+      socket.emit('unsubscribeFromCustomer', customerId);
+      socket.disconnect();
+    };
+  }, [customerId]);
 
   return (
     <>
