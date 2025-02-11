@@ -26,8 +26,8 @@ Reminder: this app is a simple proof of concept, and the implementation details 
 
 Create a POST request to the backend to simulate that an order status has updated and to see the new status reflect in realtime ONLY for the specific client for that order. For the request data, reference the ./constants/orders.js file. There is currently no sanitization or normalization of the request data.
 ```
-curl -X POST http://localhost:3005/api/order-update 
-  -H 'Content-Type: application/json' 
+curl -X POST http://localhost:3005/api/order-update \
+  -H 'Content-Type: application/json' \
   -d '{"customerId": "123", "orderId": "some-order-id-1", "status": "shipped"}'
 ```
 
